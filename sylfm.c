@@ -45,76 +45,57 @@ static SylPluginInfo info = {
 	N_(PLUGIN_DESC),
 };
 
-static void init_done_cb(GObject *obj, gpointer data);
-static void app_exit_cb(GObject *obj, gpointer data);
-
-static void folderview_menu_popup_cb(GObject *obj, GtkItemFactory *ifactory,
-				     gpointer data);
-static void summaryview_menu_popup_cb(GObject *obj, GtkItemFactory *ifactory,
-				      gpointer data);
-
-static void textview_menu_popup_cb(GObject *obj, GtkMenu *menu,
-				   GtkTextView *textview,
-				   const gchar *uri,
-				   const gchar *selected_text,
-				   MsgInfo *msginfo);
-
-static void menu_selected_cb(void);
-
-static void messageview_show_cb(GObject *obj, gpointer msgview,
-				MsgInfo *msginfo, gboolean all_headers);
-
-static void create_window(void);
-static void create_folderview_sub_widget(void);
-static int test_filter(int mode, const char *file);
-static gchar *myprocmsg_get_message_file_path(MsgInfo *msginfo);
-
 gulong app_exit_handler_id = 0;
 static int g_verbose = 0;
+static SylFmOption g_opt;
 
 void plugin_load(void)
 {
-	GList *list, *cur;
-	const gchar *ver;
-	gpointer mainwin;
+  GList *list, *cur;
+  const gchar *ver;
+  gpointer mainwin;
 
-	g_print("[PLUGIN] sylfm plug-in loaded!\n");
+  syl_init_gettext(SYLFM, "lib/locale");
 
-    xfilter_init();
+  g_print("[PLUGIN] sylfm plug-in loaded!\n");
 
-	xfilter_kvs_sqlite_set_engine();
+  xfilter_init();
 
-    const char *dbpath = xfilter_utils_get_default_base_dir();
-	xfilter_utils_set_base_dir(dbpath);
+  xfilter_kvs_sqlite_set_engine();
 
-    if (xfilter_bayes_db_init(NULL) < 0) {
-      g_print("Database initialization error\n");
-      return 127;
-	}
+  const char *dbpath = xfilter_utils_get_default_base_dir();
+  xfilter_utils_set_base_dir(dbpath);
 
-	syl_plugin_add_menuitem("/Tools", NULL, NULL, NULL);
-	syl_plugin_add_menuitem("/Tools", _("SylFm settings [sylfm]"), create_window, NULL);
+  if (xfilter_bayes_db_init(NULL) < 0) {
+    g_print("Database initialization error\n");
+    return 127;
+  }
 
-	g_signal_connect_after(syl_app_get(), "init-done", G_CALLBACK(init_done_cb),
-			 NULL);
-	app_exit_handler_id =
-	g_signal_connect(syl_app_get(), "app-exit", G_CALLBACK(app_exit_cb),
-			 NULL);
-	syl_plugin_signal_connect("folderview-menu-popup",
-				  G_CALLBACK(folderview_menu_popup_cb), NULL);
-	syl_plugin_signal_connect("summaryview-menu-popup",
-				  G_CALLBACK(summaryview_menu_popup_cb), NULL);
-	syl_plugin_signal_connect("textview-menu-popup",
-				  G_CALLBACK(textview_menu_popup_cb), NULL);
-#ifndef RELEASE_3_1 /*SYL_PLUGIN_INTERFACE_VERSION >= 0x0108*/
-	syl_plugin_signal_connect("messageview-show",
-				  G_CALLBACK(messageview_show_cb), NULL);
+#if 0
+  syl_plugin_add_menuitem("/Tools", NULL, NULL, NULL);
+  syl_plugin_add_menuitem("/Tools", _("SylFm plugin settings [sylfm]"), exec_sylfm_menu_cb, NULL);
 #endif
-	syl_plugin_add_factory_item("<SummaryView>", "/---", NULL, NULL);
-	syl_plugin_add_factory_item("<SummaryView>", _("/Show sylfilter status [sylfm]"),
-				    menu_selected_cb, NULL);
+  
+  g_signal_connect_after(syl_app_get(), "init-done", G_CALLBACK(init_done_cb),
+                         NULL);
+  app_exit_handler_id =
+	g_signal_connect(syl_app_get(), "app-exit", G_CALLBACK(app_exit_cb),
+                     NULL);
+  syl_plugin_signal_connect("folderview-menu-popup",
+                            G_CALLBACK(folderview_menu_popup_cb), NULL);
+  syl_plugin_signal_connect("summaryview-menu-popup",
+                            G_CALLBACK(summaryview_menu_popup_cb), NULL);
+  syl_plugin_signal_connect("textview-menu-popup",
+                            G_CALLBACK(textview_menu_popup_cb), NULL);
+#ifndef RELEASE_3_1 /*SYL_PLUGIN_INTERFACE_VERSION >= 0x0108*/
+  syl_plugin_signal_connect("messageview-show",
+                            G_CALLBACK(messageview_show_cb), NULL);
+#endif
+  syl_plugin_add_factory_item("<SummaryView>", "/---", NULL, NULL);
+  syl_plugin_add_factory_item("<SummaryView>", _("/Show sylfilter status [sylfm]"),
+                              menu_selected_cb, NULL);
 
-	g_print("[PLUGIN] sylfm plug-in loading done\n");
+  g_print("[PLUGIN] sylfm plug-in loading done\n");
 }
 
 void plugin_unload(void)
@@ -185,6 +166,8 @@ static void activate_menu_cb(GtkMenuItem *menuitem, gpointer data)
   MsgInfo *msginfo = (MsgInfo*)data;
   g_print("menu activated %p\n", msginfo);
   if (msginfo!=NULL){
+    exec_sylfm_popup_menu_cb(msginfo);
+#if 0
     gchar *file = NULL;
     file = myprocmsg_get_message_file_path(msginfo);
     if (!file){
@@ -211,6 +194,7 @@ static void activate_menu_cb(GtkMenuItem *menuitem, gpointer data)
         break;
       }
     }
+#endif
   }
 }
 
@@ -240,16 +224,21 @@ static void textview_menu_popup_cb(GObject *obj, GtkMenu *menu,
 
 static void menu_selected_cb(void)
 {
-	gint sel;
-	GSList *mlist;
+  gint sel;
+  GSList *mlist;
 
-	g_print("test: summary menu selected\n");
-	sel = syl_plugin_summary_get_selection_type();
-	mlist = syl_plugin_summary_get_selected_msg_list();
-	g_print("test: selection type: %d\n", sel);
-	g_print("test: number of selected summary message: %d\n",
-		g_slist_length(mlist));
-	g_slist_free(mlist);
+  g_print("test: summary menu selected\n");
+  sel = syl_plugin_summary_get_selection_type();
+  mlist = syl_plugin_summary_get_selected_msg_list();
+  g_print("test: selection type: %d\n", sel);
+  g_print("test: number of selected summary message: %d\n",
+          g_slist_length(mlist));
+
+  if (g_slist_length(mlist) == 1){
+    MsgInfo* msginfo = (MsgInfo*)g_slist_nth_data(mlist, 0);
+    exec_sylfm_popup_menu_cb(msginfo);
+  }
+  g_slist_free(mlist);
 }
 
 static void messageview_show_cb(GObject *obj, gpointer msgview,
@@ -266,20 +255,260 @@ static void button_clicked(GtkWidget *widget, gpointer data)
 	/* syl_plugin_app_will_exit(TRUE); */
 }
 
-static void create_window(void)
+static void exec_sylfm_menu_cb(void)
 {
-	GtkWidget *window;
-	GtkWidget *button;
+#if 0
+  /* show modal dialog */
+  GtkWidget *window;
+  GtkWidget *vbox;
+  GtkWidget *confirm_area;
+  GtkWidget *ok_btn;
+  GtkWidget *cancel_btn;
 
-	g_print("creating window\n");
+  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_container_set_border_width(GTK_CONTAINER(window), 8);
+  gtk_window_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+  gtk_window_set_modal(GTK_WINDOW(window), TRUE);
+  gtk_window_set_policy(GTK_WINDOW(window), FALSE, TRUE, FALSE);
+  gtk_window_set_default_size(GTK_WINDOW(window), 300, 100);
+  gtk_widget_realize(window);
 
-	window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-	button = gtk_button_new_with_label("Click this button");
-	gtk_window_set_default_size(GTK_WINDOW(window), 400, 200);
-	gtk_container_add(GTK_CONTAINER(window), button);
-	g_signal_connect(G_OBJECT(button), "clicked",
-			 G_CALLBACK(button_clicked), NULL);
-	gtk_widget_show_all(window);
+  vbox = gtk_vbox_new(FALSE, 6);
+  gtk_widget_show(vbox);
+  gtk_container_add(GTK_CONTAINER(window), vbox);
+
+  /* notebook */ 
+  GtkWidget *notebook = gtk_notebook_new();
+  /* main tab */
+  create_config_main_page(notebook, g_opt.rcfile);
+  /* about, copyright tab */
+  create_config_about_page(notebook, g_opt.rcfile);
+
+  gtk_widget_show(notebook);
+  gtk_box_pack_start(GTK_BOX(vbox), notebook, TRUE, TRUE, 0);
+
+  confirm_area = gtk_hbutton_box_new();
+  gtk_button_box_set_layout(GTK_BUTTON_BOX(confirm_area), GTK_BUTTONBOX_END);
+  gtk_box_set_spacing(GTK_BOX(confirm_area), 6);
+
+
+  ok_btn = gtk_button_new_from_stock(GTK_STOCK_OK);
+  GTK_WIDGET_SET_FLAGS(ok_btn, GTK_CAN_DEFAULT);
+  gtk_box_pack_start(GTK_BOX(confirm_area), ok_btn, FALSE, FALSE, 0);
+  gtk_widget_show(ok_btn);
+
+  gtk_widget_show(confirm_area);
+	
+  gtk_box_pack_end(GTK_BOX(vbox), confirm_area, FALSE, FALSE, 0);
+  gtk_widget_grab_default(ok_btn);
+
+  gtk_window_set_title(GTK_WINDOW(window), _("SylFm Settings"));
+
+  g_signal_connect(G_OBJECT(ok_btn), "clicked",
+                   G_CALLBACK(prefs_ok_cb), window);
+
+  /* startup settings */
+
+
+      
+  /* load settings */
+  if (g_key_file_load_from_file(g_opt.rcfile, g_opt.rcpath, G_KEY_FILE_KEEP_COMMENTS, NULL)){
+    gboolean status=g_key_file_get_boolean(g_opt.rcfile, GHOSTBIFF, "startup", NULL);
+    debug_print("startup:%s\n", status ? "TRUE" : "FALSE");
+    if (status!=FALSE){
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_opt.chk_startup), TRUE);
+    }
+
+    if (g_aquestalk2da == NULL || g_aqkanji2koe == NULL){
+      g_opt.enable_aquest=FALSE;
+      /* disable check */
+      gtk_widget_set_sensitive(GTK_WIDGET(g_opt.chk_aquest), FALSE);
+    } else {
+      g_opt.enable_aquest=TRUE;
+    }
+
+    status=g_key_file_get_boolean(g_opt.rcfile, GHOSTBIFF, "aquest", NULL);
+    debug_print("aquest:%s\n", status ? "TRUE" : "FALSE");
+
+    if (status!=FALSE){
+      gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(g_opt.chk_aquest), TRUE);
+    }
+
+    gchar *buf = g_key_file_get_string(g_opt.rcfile, GHOSTBIFF, "aq_dic_path", NULL);
+    if (buf != NULL){
+      gtk_entry_set_text(GTK_ENTRY(g_opt.aq_dic_entry), buf);
+    }
+
+    buf = g_key_file_get_string(g_opt.rcfile, GHOSTBIFF, "phont_path", NULL);
+    if (buf != NULL){
+      gtk_entry_set_text(GTK_ENTRY(g_opt.phont_entry), buf);
+
+      GDir* gdir = g_dir_open(buf, 0, NULL);
+      GList* items = NULL;
+      const gchar *file =NULL;
+      do {
+        file = g_dir_read_name(gdir);
+        if (file!=NULL){
+          debug_print("%s\n", file);
+          items = g_list_append(items, g_strdup(file));
+        }
+      } while (file!=NULL);
+    
+      gtk_combo_set_popdown_strings(GTK_COMBO(g_opt.phont_cmb), items);
+    }
+
+    buf = g_key_file_get_string(g_opt.rcfile, GHOSTBIFF, "phont", NULL);
+    if (buf != NULL){
+      gtk_entry_set_text(GTK_ENTRY(GTK_COMBO(g_opt.phont_cmb)->entry), buf);
+    }
+
+   /*    gchar *to=g_key_file_get_string (g_opt.rcfile, GHOSTBIFF, "to", NULL);
+    gtk_entry_set_text(GTK_ENTRY(g_address), to);
+    */
+  }
+  gtk_notebook_set_current_page(GTK_NOTEBOOK(notebook), 0);
+
+  gtk_widget_show(window);
+#endif
+}
+
+
+static void exec_sylfm_popup_menu_cb(MsgInfo *msginfo)
+{
+  /* show modal dialog */
+  GtkWidget *window;
+  GtkWidget *vbox;
+  GtkWidget *confirm_area;
+  GtkWidget *ok_btn;
+  GtkWidget *cancel_btn;
+
+  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  gtk_container_set_border_width(GTK_CONTAINER(window), 8);
+  gtk_window_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
+  gtk_window_set_modal(GTK_WINDOW(window), TRUE);
+  gtk_window_set_policy(GTK_WINDOW(window), FALSE, TRUE, FALSE);
+  gtk_window_set_default_size(GTK_WINDOW(window), 300, 200);
+  gtk_widget_realize(window);
+
+  vbox = gtk_vbox_new(FALSE, 6);
+  gtk_widget_show(vbox);
+  gtk_container_add(GTK_CONTAINER(window), vbox);
+
+  /* main tab */
+  GtkWidget *frame = gtk_frame_new(_("Sylfilter Result:"));
+  GtkWidget *label = NULL;
+  gchar *file = NULL;
+  file = myprocmsg_get_message_file_path(msginfo);
+  if (!file){
+  } else {
+    g_print("msg file %s\n", file);
+    int retval = 0;
+    retval = test_filter(0, file);
+    switch(retval){
+    case 0:
+      /* junk */
+      label = gtk_label_new(_("junk"));
+      g_print("junk: %s\n", file);
+      break;
+    case 1:
+      /* clean */
+      label = gtk_label_new(_("clean"));
+      g_print("clean: %s\n", file);
+      break;
+    case 2:
+      /* unknown */
+      label = gtk_label_new(_("could not be classified"));
+      g_print("unknown: %s\n", file);
+      break;
+    case 127:
+      /* error */
+      label = gtk_label_new(_("error"));
+      g_print("error: %s\n", file);
+      break;
+    }
+  }
+  gtk_container_add(GTK_CONTAINER(frame), label);
+  
+  gtk_box_pack_start(GTK_BOX(vbox), frame, TRUE, TRUE, 0);
+
+  GtkWidget *frame2 = gtk_frame_new(_("Sylfilter by hand:"));
+
+  GtkWidget *hbox = gtk_hbox_new (TRUE, 2);
+  g_opt.junk_radio = gtk_radio_button_new_with_label(NULL, _("junk mail"));
+  g_opt.clear_radio = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON (g_opt.junk_radio),
+                                                                  _("clear mail"));
+  GtkWidget *apply_btn = gtk_button_new_from_stock(GTK_STOCK_APPLY);
+  /* Pack them into a box, then show all the widgets */
+  gtk_box_pack_start (GTK_BOX (hbox), g_opt.junk_radio, TRUE, TRUE, 2);
+  gtk_box_pack_start (GTK_BOX (hbox), g_opt.clear_radio, TRUE, TRUE, 2);
+  gtk_box_pack_start (GTK_BOX (hbox), apply_btn, TRUE, TRUE, 2);
+  gtk_container_add (GTK_CONTAINER (frame2), hbox);
+   
+  g_signal_connect (apply_btn, "clicked",
+                    G_CALLBACK (apply_sylfilter_cb), msginfo);
+
+  gtk_box_pack_start(GTK_BOX(vbox), frame2, FALSE, FALSE, 0);
+
+  confirm_area = gtk_hbutton_box_new();
+  gtk_button_box_set_layout(GTK_BUTTON_BOX(confirm_area), GTK_BUTTONBOX_END);
+  gtk_box_set_spacing(GTK_BOX(confirm_area), 6);
+
+
+  ok_btn = gtk_button_new_from_stock(GTK_STOCK_OK);
+  GTK_WIDGET_SET_FLAGS(ok_btn, GTK_CAN_DEFAULT);
+  gtk_box_pack_start(GTK_BOX(confirm_area), ok_btn, FALSE, FALSE, 0);
+  gtk_widget_show(ok_btn);
+
+  gtk_widget_show(confirm_area);
+	
+  gtk_box_pack_end(GTK_BOX(vbox), confirm_area, FALSE, FALSE, 0);
+  gtk_widget_grab_default(ok_btn);
+
+  gtk_window_set_title(GTK_WINDOW(window), _("SylFm Settings"));
+
+  g_signal_connect(G_OBJECT(ok_btn), "clicked",
+                   G_CALLBACK(popup_ok_cb), window);
+
+  gtk_widget_show_all(window);
+}
+
+static void prefs_ok_cb(GtkWidget *widget, gpointer data)
+{
+  gtk_widget_destroy(GTK_WIDGET(data));
+}
+
+static void popup_ok_cb(GtkWidget *widget, gpointer data)
+{
+  gtk_widget_destroy(GTK_WIDGET(data));
+}
+
+static void apply_sylfilter_cb( GtkWidget *widget,
+                                gpointer   data )
+{
+  MsgInfo *msginfo = (MsgInfo*)data;
+
+  gchar *file = NULL;
+  file = myprocmsg_get_message_file_path(msginfo);
+  if (!file){
+  } else {
+    g_print("msg file %s\n", file);
+    int retval = 0;
+    gboolean bjunk = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_opt.junk_radio));
+    if (bjunk != FALSE){
+      g_print("MODE_LEARN_JUNK file %s\n", file);
+      retval = learn_filter(MODE_LEARN_JUNK, file);
+    } else {
+      g_print("MODE_LEARN_CLEAN file %s\n", file);
+      retval = learn_filter(MODE_LEARN_CLEAN, file);
+    }
+    if (retval != 0) {
+      /* error */
+      g_print("error: %s\n", file);
+    } else {
+      g_print("ok: %s\n", file);
+    }
+  }
+  /**/
 }
 
 static void create_folderview_sub_widget(void)
@@ -349,6 +578,96 @@ static int test_filter(int mode, const char *file)
   xfilter_result_free(res);
   xfilter_message_data_free(msgdata);
 
+  xfilter_manager_free(mgr);
+
+  return retval;
+}
+
+static int learn_filter(int mode, const char *file)
+{
+  XFilterManager *mgr;
+  XMessageData *msgdata;
+  XMessageData *resdata;
+  XFilterResult *res;
+  XFilterStatus status;
+  int retval = 0;
+
+  static XFilterConstructorFunc learn_junk_ctors[] = {
+    xfilter_textcontent_new,
+    xfilter_wordsep_new,
+    xfilter_ngram_new,
+    xfilter_bayes_learn_junk_new,
+    NULL
+  };
+
+  static XFilterConstructorFunc learn_nojunk_ctors[] = {
+    xfilter_textcontent_new,
+    xfilter_wordsep_new,
+    xfilter_ngram_new,
+    xfilter_bayes_learn_nojunk_new,
+    NULL
+  };
+
+  static XFilterConstructorFunc unlearn_junk_ctors[] = {
+    xfilter_textcontent_new,
+    xfilter_wordsep_new,
+    xfilter_ngram_new,
+    xfilter_bayes_unlearn_junk_new,
+    NULL
+  };
+
+  static XFilterConstructorFunc unlearn_nojunk_ctors[] = {
+    xfilter_textcontent_new,
+    xfilter_wordsep_new,
+    xfilter_ngram_new,
+    xfilter_bayes_unlearn_nojunk_new,
+    NULL
+  };
+
+  if (g_verbose)
+    printf("learning message file: %s\n", file);
+
+  mgr = xfilter_manager_new();
+
+  switch (mode) {
+  case MODE_LEARN_JUNK:
+    xfilter_manager_add_filters(mgr, learn_junk_ctors);
+    break;
+  case MODE_LEARN_CLEAN:
+    xfilter_manager_add_filters(mgr, learn_nojunk_ctors);
+    break;
+  case MODE_UNLEARN_JUNK:
+    xfilter_manager_add_filters(mgr, unlearn_junk_ctors);
+    break;
+  case MODE_UNLEARN_CLEAN:
+    xfilter_manager_add_filters(mgr, unlearn_nojunk_ctors);
+    break;
+  default:
+    fprintf(stderr, "Internal error: invalid learn mode\n");
+    xfilter_manager_free(mgr);
+    return 127;
+  }
+
+  msgdata = xfilter_message_data_read_file(file, "message/rfc822");
+
+  res = xfilter_manager_run(mgr, msgdata);
+  if (g_verbose)
+    xfilter_result_print(res);
+  status = xfilter_result_get_status(res);
+  if (status == XF_UNSUPPORTED_TYPE || status == XF_ERROR) {
+    fprintf(stderr, "%s: Error on learning mail\n", file);
+    retval = 127;
+  }
+
+  if (xfilter_get_debug_mode()) {
+    resdata = xfilter_result_get_message_data(res);
+#if 0
+    print_message_data(resdata);
+#endif
+  }
+
+  xfilter_result_free(res);
+  xfilter_message_data_free(msgdata);
   xfilter_manager_free(mgr);
 
   return retval;

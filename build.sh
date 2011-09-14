@@ -8,7 +8,7 @@ LIBSYLPH=./lib/libsylph-0-1.a
 LIBSYLPHEED=./lib/libsylpheed-plugin-0-1.a
 LIBSYLFILTER=./lib/libsylfilter.a
 #LIBS=" -lglib-2.0-0  -lintl"
-LIBS=" `pkg-config --libs glib-2.0 gobject-2.0 gtk+-2.0 gthread-2.0` -lsqlite3"
+LIBS=" `pkg-config --libs glib-2.0 gobject-2.0 gtk+-2.0 gthread-2.0` -L./lib -lsqlite3-0"
 INC=" -I. -I../../ -I../../libsylph -I../../src -I/mingw/local `pkg-config --cflags glib-2.0 cairo gdk-2.0 gtk+-2.0 gthread-2.0`"
 
 USE_AQUESTALK=1
@@ -41,7 +41,7 @@ function compile ()
         echo "compile error"
         exit
     fi
-    com="gcc -shared -o $TARGET $OBJS -L./lib $LIBSYLPH $LIBSYLPHEED $LIBSYLFILTER $LIBS -lssleay32 -leay32 -lws2_32 -liconv -lonig"
+    com="gcc -shared -o $TARGET $OBJS -L./lib $LIBSYLPH $LIBSYLPHEED $LIBSYLFILTER $LIBS -lssleay32 -leay32 -lws2_32 -liconv"
     echo $com
     eval $com
     if [ $? != 0 ]; then
@@ -113,7 +113,7 @@ else
                     zip -r sylpheed-$NAME-$r.zip README.ja.txt
                     #zip -r sylpheed-$NAME-$r.zip $NAME.c
                     zip -r sylpheed-$NAME-$r.zip po/$NAME.mo
-                    zip -r sylpheed-$NAME-$r.zip *.xpm
+                    #zip -r sylpheed-$NAME-$r.zip *.xpm
                 fi
                 ;;
             -c|-compile)

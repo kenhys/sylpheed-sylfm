@@ -24,7 +24,7 @@
 #include <glib/gi18n-lib.h>
 #include <locale.h>
 
-#define _(String) dgettext("ghostbiff", String)
+#define _(String) dgettext("sylfm", String)
 #define N_(String) gettext_noop(String)
 #define gettext_noop(String) (String)
 
@@ -33,5 +33,56 @@
 
 #define PLUGIN_NAME N_("SylFm - SylFilter management plug-in for Sylpheed")
 #define PLUGIN_DESC N_("SylFilter management plug-in for Sylpheed")
+
+struct _SylFmOption {
+  /* full path to ghostbiffrc*/
+  gchar *rcpath;
+  /* rcfile */
+  GKeyFile *rcfile;
+
+  /**/
+  GtkWidget *junk_radio;
+  GtkWidget *clear_radio;
+};
+
+enum {
+	MODE_TEST_JUNK,
+	MODE_LEARN_JUNK,
+	MODE_LEARN_CLEAN,
+	MODE_UNLEARN_JUNK,
+	MODE_UNLEARN_CLEAN,
+	MODE_SHOW_STATUS
+};
+
+typedef struct _SylFmOption SylFmOption;
+
+static void init_done_cb(GObject *obj, gpointer data);
+static void app_exit_cb(GObject *obj, gpointer data);
+
+static void folderview_menu_popup_cb(GObject *obj, GtkItemFactory *ifactory,
+				     gpointer data);
+static void summaryview_menu_popup_cb(GObject *obj, GtkItemFactory *ifactory,
+				      gpointer data);
+
+static void textview_menu_popup_cb(GObject *obj, GtkMenu *menu,
+				   GtkTextView *textview,
+				   const gchar *uri,
+				   const gchar *selected_text,
+				   MsgInfo *msginfo);
+
+static void menu_selected_cb(void);
+
+static void messageview_show_cb(GObject *obj, gpointer msgview,
+				MsgInfo *msginfo, gboolean all_headers);
+
+static void create_window(void);
+static void create_folderview_sub_widget(void);
+static void exec_sylfm_popup_menu_cb(MsgInfo *msginfo);
+static int test_filter(int mode, const char *file);
+static int learn_filter(int mode, const char *file);
+static gchar *myprocmsg_get_message_file_path(MsgInfo *msginfo);
+static void prefs_ok_cb(GtkWidget *widget, gpointer data);
+static void popup_ok_cb(GtkWidget *widget, gpointer data);
+static void apply_sylfilter_cb( GtkWidget *widget, gpointer   data);
 
 #endif /* __SYLFM_H__ */

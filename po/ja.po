@@ -1,0 +1,73 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2011-09-15 01:50+0900\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: HAYASHI Kentaro <kenhys@gmail.com>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+#: sylfm.h:34
+msgid "SylFm - SylFilter management plug-in for Sylpheed"
+msgstr "SylFm - SylFilter 管理プラグイン for Sylpheed"
+
+#: sylfm.h:35
+msgid "SylFilter management plug-in for Sylpheed"
+msgstr "SylFilter 管理プラグイン for Sylpheed"
+
+#: sylfm.c:76
+msgid "SylFm plugin settings [sylfm]"
+msgstr "SylFm プラグイン設定 [sylfm]"
+
+#: sylfm.c:95 sylfm.c:151
+msgid "/Show sylfilter status [sylfm]"
+msgstr "/sylfilterの状態を表示 [sylfm]"
+
+#: sylfm.c:219
+msgid "Show sylfilter status"
+msgstr "sylfilterの状態を表示"
+
+#: sylfm.c:305 sylfm.c:467
+msgid "SylFm Settings"
+msgstr "SylFm 設定"
+
+#: sylfm.c:398
+msgid "Sylfilter Result:"
+msgstr "Sylfilter結果:"
+
+#: sylfm.c:410
+msgid "junk"
+msgstr "ジャンク"
+
+#: sylfm.c:415
+msgid "clean"
+msgstr "通常"
+
+#: sylfm.c:420
+msgid "could not be classified"
+msgstr "未確定"
+
+#: sylfm.c:425
+msgid "error"
+msgstr "エラー"
+
+#: sylfm.c:434
+msgid "Sylfilter by hand:"
+msgstr "手作業でフィルタ:"
+
+#: sylfm.c:437
+msgid "junk mail"
+msgstr "SPAMメール"
+
+#: sylfm.c:439
+msgid "clear mail"
+msgstr "通常メール"
