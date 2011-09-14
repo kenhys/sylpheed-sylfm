@@ -88,21 +88,12 @@ void plugin_load(void)
 	xfilter_utils_set_base_dir(dbpath);
 
     if (xfilter_bayes_db_init(NULL) < 0) {
-		fprintf(stderr, "Database initialization error\n");
-		return 127;
+      g_print("Database initialization error\n");
+      return 127;
 	}
 
-	ver = syl_plugin_get_prog_version();
-	g_print("program ver: %s\n", ver);
-
-	mainwin = syl_plugin_main_window_get();
-	g_print("mainwin: %p\n", mainwin);
-	syl_plugin_main_window_popup(mainwin);
-
-	create_folderview_sub_widget();
-
 	syl_plugin_add_menuitem("/Tools", NULL, NULL, NULL);
-	syl_plugin_add_menuitem("/Tools", "Plugin test", create_window, NULL);
+	syl_plugin_add_menuitem("/Tools", _("SylFm settings [sylfm]"), create_window, NULL);
 
 	g_signal_connect_after(syl_app_get(), "init-done", G_CALLBACK(init_done_cb),
 			 NULL);
@@ -120,7 +111,7 @@ void plugin_load(void)
 				  G_CALLBACK(messageview_show_cb), NULL);
 #endif
 	syl_plugin_add_factory_item("<SummaryView>", "/---", NULL, NULL);
-	syl_plugin_add_factory_item("<SummaryView>", "/Show sylfilter score [sylfm]",
+	syl_plugin_add_factory_item("<SummaryView>", _("/Show sylfilter status [sylfm]"),
 				    menu_selected_cb, NULL);
 
 	g_print("[PLUGIN] sylfm plug-in loading done\n");
@@ -173,12 +164,20 @@ static void folderview_menu_popup_cb(GObject *obj, GtkItemFactory *ifactory,
 static void summaryview_menu_popup_cb(GObject *obj, GtkItemFactory *ifactory,
 				      gpointer data)
 {
-	GtkWidget *widget;
+  GtkWidget *widget;
 
-	g_print("test: %p: summaryview menu popup\n", obj);
-	widget = gtk_item_factory_get_item(ifactory, "/Show sylfilter status");
-	if (widget)
-		gtk_widget_set_sensitive(widget, TRUE);
+  g_print("test: %p: summaryview menu popup\n", obj);
+  widget = gtk_item_factory_get_item(ifactory, _("/Show sylfilter status [sylfm]"));
+  if (widget){
+	GSList *mlist = syl_plugin_summary_get_selected_msg_list();
+    gtk_widget_set_sensitive(widget, FALSE);
+    if (mlist != NULL && g_slist_length(mlist) == 1){
+      gtk_widget_set_sensitive(widget, TRUE);
+    }
+    if (mlist){
+      g_slist_free(mlist);
+    }
+  }
 }
 
 static void activate_menu_cb(GtkMenuItem *menuitem, gpointer data)
