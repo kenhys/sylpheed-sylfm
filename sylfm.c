@@ -26,6 +26,11 @@
 #include "folder.h"
 #include "procmsg.h"
 
+#include "sylfilter/filter.h"
+#include "sylfilter/filter-kvs.h"
+#include "sylfilter/filter-kvs-sqlite.h"
+#include "sylfilter/filter-manager.h"
+#include "sylfilter/filter-utils.h"
 #include "sylfilter/textcontent-filter.h"
 #include "sylfilter/blacklist-filter.h"
 #include "sylfilter/whitelist-filter.h"
@@ -34,10 +39,10 @@
 #include "sylfilter/bayes-filter.h"
 
 static SylPluginInfo info = {
-	"Test Plugin",
-	"3.1.0",
-	"Hiroyuki Yamamoto",
-	"Test plug-in for Sylpheed plug-in system"
+	N_(PLUGIN_NAME),
+	"0.1.0",
+	"HAYASHI Kentaro",
+	N_(PLUGIN_DESC),
 };
 
 static void init_done_cb(GObject *obj, gpointer data);
@@ -77,12 +82,13 @@ void plugin_load(void)
 
 	g_print("test plug-in loaded!\n");
 
-	list = folder_get_list();
-	g_print("folder list = %p\n", list);
-	for (cur = list; cur != NULL; cur = cur->next) {
-		Folder *folder = FOLDER(cur->data);
-		gchar *id = folder_get_identifier(folder);
-		g_print("folder id = %s\n", id);
+    xfilter_init();
+
+	xfilter_kvs_sqlite_set_engine();
+
+    if (xfilter_bayes_db_init(NULL) < 0) {
+		fprintf(stderr, "Database initialization error\n");
+		return 127;
 	}
 
 	ver = syl_plugin_get_prog_version();
