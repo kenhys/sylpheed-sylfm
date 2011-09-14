@@ -61,18 +61,16 @@ static void textview_menu_popup_cb(GObject *obj, GtkMenu *menu,
 
 static void menu_selected_cb(void);
 
-static void compose_created_cb(GObject *obj, gpointer compose);
-static void compose_destroy_cb(GObject *obj, gpointer compose);
-static gboolean compose_send_cb(GObject *obj, gpointer compose,
-				gint compose_mode, gint send_mode,
-				const gchar *msg_file, GSList *to_list);
 static void messageview_show_cb(GObject *obj, gpointer msgview,
 				MsgInfo *msginfo, gboolean all_headers);
 
 static void create_window(void);
 static void create_folderview_sub_widget(void);
+static int test_filter(int mode, const char *file);
+static gchar *myprocmsg_get_message_file_path(MsgInfo *msginfo);
 
 gulong app_exit_handler_id = 0;
+static int g_verbose = 0;
 
 void plugin_load(void)
 {
@@ -80,11 +78,14 @@ void plugin_load(void)
 	const gchar *ver;
 	gpointer mainwin;
 
-	g_print("test plug-in loaded!\n");
+	g_print("[PLUGIN] sylfm plug-in loaded!\n");
 
     xfilter_init();
 
 	xfilter_kvs_sqlite_set_engine();
+
+    const char *dbpath = xfilter_utils_get_default_base_dir();
+	xfilter_utils_set_base_dir(dbpath);
 
     if (xfilter_bayes_db_init(NULL) < 0) {
 		fprintf(stderr, "Database initialization error\n");
@@ -114,20 +115,15 @@ void plugin_load(void)
 				  G_CALLBACK(summaryview_menu_popup_cb), NULL);
 	syl_plugin_signal_connect("textview-menu-popup",
 				  G_CALLBACK(textview_menu_popup_cb), NULL);
-	syl_plugin_signal_connect("compose-created",
-				  G_CALLBACK(compose_created_cb), NULL);
-	syl_plugin_signal_connect("compose-destroy",
-				  G_CALLBACK(compose_destroy_cb), NULL);
-	syl_plugin_signal_connect("compose-send",
-				  G_CALLBACK(compose_send_cb), NULL);
+#ifndef RELEASE_3_1 /*SYL_PLUGIN_INTERFACE_VERSION >= 0x0108*/
 	syl_plugin_signal_connect("messageview-show",
 				  G_CALLBACK(messageview_show_cb), NULL);
-
+#endif
 	syl_plugin_add_factory_item("<SummaryView>", "/---", NULL, NULL);
-	syl_plugin_add_factory_item("<SummaryView>", "/Test Plug-in menu",
+	syl_plugin_add_factory_item("<SummaryView>", "/Show sylfilter score [sylfm]",
 				    menu_selected_cb, NULL);
 
-	g_print("test plug-in loading done\n");
+	g_print("[PLUGIN] sylfm plug-in loading done\n");
 }
 
 void plugin_unload(void)
@@ -143,7 +139,14 @@ SylPluginInfo *plugin_info(void)
 
 gint plugin_interface_version(void)
 {
-	return SYL_PLUGIN_INTERFACE_VERSION;
+#ifdef RELEASE_3_1
+    /* emulate sylpheed 3.1.0 not svn HEAD */
+    return 0x0107;
+#else
+ /* sylpheed 3.2.0 or later. */
+    return 0x0108;
+    /*return SYL_PLUGIN_INTERFACE_VERSION;*/
+#endif
 }
 
 static void init_done_cb(GObject *obj, gpointer data)
@@ -173,14 +176,43 @@ static void summaryview_menu_popup_cb(GObject *obj, GtkItemFactory *ifactory,
 	GtkWidget *widget;
 
 	g_print("test: %p: summaryview menu popup\n", obj);
-	widget = gtk_item_factory_get_item(ifactory, "/Test Plug-in menu");
+	widget = gtk_item_factory_get_item(ifactory, "/Show sylfilter status");
 	if (widget)
 		gtk_widget_set_sensitive(widget, TRUE);
 }
 
 static void activate_menu_cb(GtkMenuItem *menuitem, gpointer data)
 {
-	g_print("menu activated\n");
+  MsgInfo *msginfo = (MsgInfo*)data;
+  g_print("menu activated %p\n", msginfo);
+  if (msginfo!=NULL){
+    gchar *file = NULL;
+    file = myprocmsg_get_message_file_path(msginfo);
+    if (!file){
+    } else {
+      g_print("msg file %s\n", file);
+      int retval = 0;
+      retval = test_filter(0, file);
+      switch(retval){
+      case 0:
+        /* junk */
+        g_print("junk: %s\n", file);
+        break;
+      case 1:
+        /* clean */
+        g_print("clean: %s\n", file);
+        break;
+      case 2:
+        /* unknown */
+        g_print("unknown: %s\n", file);
+        break;
+      case 127:
+        /* error */
+        g_print("error: %s\n", file);
+        break;
+      }
+    }
+  }
 }
 
 static void textview_menu_popup_cb(GObject *obj, GtkMenu *menu,
@@ -201,8 +233,8 @@ static void textview_menu_popup_cb(GObject *obj, GtkMenu *menu,
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), separator);
 	gtk_widget_show(separator);
 
-	menuitem = gtk_menu_item_new_with_mnemonic("Test menu");
-	g_signal_connect(menuitem, "activate", G_CALLBACK(activate_menu_cb), NULL);
+	menuitem = gtk_menu_item_new_with_mnemonic(_("Show sylfilter status"));
+	g_signal_connect(menuitem, "activate", G_CALLBACK(activate_menu_cb), msginfo);
 	gtk_menu_shell_append(GTK_MENU_SHELL(menu), menuitem);
 	gtk_widget_show(menuitem);
 }
@@ -219,37 +251,6 @@ static void menu_selected_cb(void)
 	g_print("test: number of selected summary message: %d\n",
 		g_slist_length(mlist));
 	g_slist_free(mlist);
-}
-
-static void compose_created_cb(GObject *obj, gpointer compose)
-{
-	gchar *text;
-
-	g_print("test: %p: compose created (%p)\n", obj, compose);
-
-	text = syl_plugin_compose_entry_get_text(compose, 0);
-	g_print("test: compose To: %s\n", text);
-	g_free(text);
-#if 0
-	syl_plugin_compose_entry_set(compose, "test-plugin@test", 1);
-	syl_plugin_compose_entry_append(compose, "second@test", 1);
-#endif
-}
-
-static void compose_destroy_cb(GObject *obj, gpointer compose)
-{
-	g_print("test: %p: compose will be destroyed (%p)\n", obj, compose);
-}
-
-static gboolean compose_send_cb(GObject *obj, gpointer compose,
-				gint compose_mode, gint send_mode,
-				const gchar *msg_file, GSList *to_list)
-{
-	g_print("test: %p: composed message will be sent (%p)\n", obj, compose);
-	g_print("test: compose_mode: %d, send_mode: %d, file: %s\n",
-		compose_mode, send_mode, msg_file);
-
-	return FALSE; /* return TRUE to cancel sending */
 }
 
 static void messageview_show_cb(GObject *obj, gpointer msgview,
@@ -294,4 +295,87 @@ static void create_folderview_sub_widget(void)
 	gtk_box_pack_start(GTK_BOX(vbox), button, FALSE, FALSE, 0);
 	gtk_widget_show_all(vbox);
 	syl_plugin_folderview_add_sub_widget(vbox);
+}
+
+static int test_filter(int mode, const char *file)
+{
+  XFilterManager *mgr;
+  XMessageData *msgdata;
+  XMessageData *resdata;
+  XFilterResult *res;
+  XFilterStatus status;
+  int retval = 0;
+
+  XFilterConstructorFunc ctors[] = {
+    xfilter_textcontent_new,
+    xfilter_blacklist_new,
+    xfilter_whitelist_new,
+    xfilter_wordsep_new,
+    xfilter_ngram_new,
+    xfilter_bayes_new,
+    NULL
+  };
+
+  if (g_verbose) {
+    printf("testing message file: %s\n", file);
+  }
+  mgr = xfilter_manager_new();
+  xfilter_manager_add_filters(mgr, ctors);
+
+  msgdata = xfilter_message_data_read_file(file, "message/rfc822");
+
+  res = xfilter_manager_run(mgr, msgdata);
+  if (g_verbose)
+    xfilter_result_print(res);
+  status = xfilter_result_get_status(res);
+  if (status == XF_JUNK) {
+    g_print("%s: This is a junk mail (prob: %f)\n", file, xfilter_result_get_probability(res));
+    retval = 0;
+  } else if (status == XF_UNCERTAIN) {
+    g_print("%s: This mail could not be classified (prob: %f)\n", file, xfilter_result_get_probability(res));
+    retval = 2;
+  } else if (status == XF_UNSUPPORTED_TYPE || status == XF_ERROR) {
+    g_print("%s: Error on testing mail\n", file);
+    retval = 127;
+  } else {
+    g_print("%s: This is a clean mail (prob: %f)\n", file, xfilter_result_get_probability(res));
+    retval = 1;
+  }
+
+  if (xfilter_get_debug_mode()) {
+    resdata = xfilter_result_get_message_data(res);
+    /*print_message_data(resdata);*/
+  }
+
+  xfilter_result_free(res);
+  xfilter_message_data_free(msgdata);
+
+  xfilter_manager_free(mgr);
+
+  return retval;
+}
+
+static gchar *myprocmsg_get_message_file_path(MsgInfo *msginfo)
+{
+  gchar *path, *file = NULL;
+
+  g_return_val_if_fail(msginfo != NULL, NULL);
+
+  if (msginfo->encinfo && msginfo->encinfo->plaintext_file){
+    file = g_strdup(msginfo->encinfo->plaintext_file);
+  } else if (msginfo->file_path) {
+    g_print("msginfo->file_path:%p\n", msginfo->file_path);
+    return g_strdup(msginfo->file_path);
+  } else {
+    gchar nstr[16];
+    path = folder_item_get_path(msginfo->folder);
+    g_print("msginfo->folder:%s\n", path);
+    g_print("msginfo->msgnum:%d\n", msginfo->msgnum);
+    g_snprintf(nstr, 11, "%u", msginfo->msgnum);
+    file = g_strconcat(path, G_DIR_SEPARATOR_S,
+                       nstr, NULL);
+    g_print("file:%s", file);
+    g_free(path);
+  }
+  return file;
 }

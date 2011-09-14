@@ -12,7 +12,7 @@ LIBS=" `pkg-config --libs glib-2.0 gobject-2.0 gtk+-2.0 gthread-2.0` -lsqlite3"
 INC=" -I. -I../../ -I../../libsylph -I../../src -I/mingw/local `pkg-config --cflags glib-2.0 cairo gdk-2.0 gtk+-2.0 gthread-2.0`"
 
 USE_AQUESTALK=1
-DEF=" -DHAVE_CONFIG_H -DUNICODE -D_UNICODE "
+DEF=" -DHAVE_CONFIG_H -DUNICODE -D_UNICODE -DRELEASE_3_1"
 DEBUG=0
 LIB_AQUESTALK=""
 if [ "$USE_AQUESTALK" -eq 1 ]; then
