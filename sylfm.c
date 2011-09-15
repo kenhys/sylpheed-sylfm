@@ -59,18 +59,6 @@ void plugin_load(void)
 
   g_print("[PLUGIN] sylfm plug-in loaded!\n");
 
-  xfilter_init();
-
-  xfilter_kvs_sqlite_set_engine();
-
-  const char *dbpath = xfilter_utils_get_default_base_dir();
-  xfilter_utils_set_base_dir(dbpath);
-
-  if (xfilter_bayes_db_init(NULL) < 0) {
-    g_print("Database initialization error\n");
-    return 127;
-  }
-
 #if 0
   syl_plugin_add_menuitem("/Tools", NULL, NULL, NULL);
   syl_plugin_add_menuitem("/Tools", _("SylFm plugin settings [sylfm]"), exec_sylfm_menu_cb, NULL);
@@ -167,34 +155,6 @@ static void activate_menu_cb(GtkMenuItem *menuitem, gpointer data)
   g_print("menu activated %p\n", msginfo);
   if (msginfo!=NULL){
     exec_sylfm_popup_menu_cb(msginfo);
-#if 0
-    gchar *file = NULL;
-    file = myprocmsg_get_message_file_path(msginfo);
-    if (!file){
-    } else {
-      g_print("msg file %s\n", file);
-      int retval = 0;
-      retval = test_filter(0, file);
-      switch(retval){
-      case 0:
-        /* junk */
-        g_print("junk: %s\n", file);
-        break;
-      case 1:
-        /* clean */
-        g_print("clean: %s\n", file);
-        break;
-      case 2:
-        /* unknown */
-        g_print("unknown: %s\n", file);
-        break;
-      case 127:
-        /* error */
-        g_print("error: %s\n", file);
-        break;
-      }
-    }
-#endif
   }
 }
 
@@ -401,6 +361,19 @@ static void exec_sylfm_popup_menu_cb(MsgInfo *msginfo)
   file = myprocmsg_get_message_file_path(msginfo);
   if (!file){
   } else {
+    xfilter_init();
+
+    xfilter_kvs_sqlite_set_engine();
+
+    gchar *dbpath = xfilter_utils_get_default_base_dir();
+    xfilter_utils_set_base_dir(dbpath);
+
+    if (xfilter_bayes_db_init(dbpath) < 0) {
+      g_print("[PLUGIN] Database initialization error.\n");
+      xfilter_done();
+      return;
+    }
+
     g_print("msg file %s\n", file);
     int retval = 0;
     retval = test_filter(0, file);
@@ -426,6 +399,8 @@ static void exec_sylfm_popup_menu_cb(MsgInfo *msginfo)
       g_print("error: %s\n", file);
       break;
     }
+    xfilter_bayes_db_done();
+    xfilter_done();
   }
   gtk_container_add(GTK_CONTAINER(frame), label);
   
@@ -436,7 +411,7 @@ static void exec_sylfm_popup_menu_cb(MsgInfo *msginfo)
   GtkWidget *hbox = gtk_hbox_new (TRUE, 2);
   g_opt.junk_radio = gtk_radio_button_new_with_label(NULL, _("junk mail"));
   g_opt.clear_radio = gtk_radio_button_new_with_label_from_widget(GTK_RADIO_BUTTON (g_opt.junk_radio),
-                                                                  _("clear mail"));
+                                                                  _("clean mail"));
   GtkWidget *apply_btn = gtk_button_new_from_stock(GTK_STOCK_APPLY);
   /* Pack them into a box, then show all the widgets */
   gtk_box_pack_start (GTK_BOX (hbox), g_opt.junk_radio, TRUE, TRUE, 2);
@@ -494,6 +469,19 @@ static void apply_sylfilter_cb( GtkWidget *widget,
     g_print("msg file %s\n", file);
     int retval = 0;
     gboolean bjunk = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_opt.junk_radio));
+    xfilter_init();
+
+    xfilter_kvs_sqlite_set_engine();
+
+    gchar *dbpath = xfilter_utils_get_default_base_dir();
+    xfilter_utils_set_base_dir(dbpath);
+
+    if (xfilter_bayes_db_init(dbpath) < 0) {
+      g_print("[PLUGIN] Database initialization error.\n");
+      xfilter_done();
+      return;
+    }
+
     if (bjunk != FALSE){
       g_print("MODE_LEARN_JUNK file %s\n", file);
       retval = learn_filter(MODE_LEARN_JUNK, file);
@@ -507,6 +495,8 @@ static void apply_sylfilter_cb( GtkWidget *widget,
     } else {
       g_print("ok: %s\n", file);
     }
+    xfilter_bayes_db_done();
+    xfilter_done();
   }
   /**/
 }
