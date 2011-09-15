@@ -96,6 +96,12 @@ else
                     echo $com
                     eval $com
                 fi
+                DEST="/C/apps/Sylpheed312/lib/locale/ja/LC_MESSAGES"
+                if [ -d "$DEST" ]; then
+                    com="cp po/$NAME.mo $DEST/$NAME.mo"
+                    echo $com
+                    eval $com
+                fi
                 exit
                 ;;
             res)
