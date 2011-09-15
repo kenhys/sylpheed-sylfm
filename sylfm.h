@@ -40,6 +40,7 @@ struct _SylFmOption {
   /* rcfile */
   GKeyFile *rcfile;
 
+  GtkWidget *window;
   /**/
   GtkWidget *junk_radio;
   GtkWidget *clear_radio;

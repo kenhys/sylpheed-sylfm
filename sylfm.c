@@ -211,13 +211,12 @@ static void exec_sylfm_menu_cb(void)
 {
 #if 0
   /* show modal dialog */
-  GtkWidget *window;
   GtkWidget *vbox;
   GtkWidget *confirm_area;
   GtkWidget *ok_btn;
   GtkWidget *cancel_btn;
 
-  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  g_opt.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_container_set_border_width(GTK_CONTAINER(window), 8);
   gtk_window_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
   gtk_window_set_modal(GTK_WINDOW(window), TRUE);
@@ -328,22 +327,25 @@ static void exec_sylfm_menu_cb(void)
 static void exec_sylfm_popup_menu_cb(MsgInfo *msginfo)
 {
   /* show modal dialog */
-  GtkWidget *window;
   GtkWidget *vbox;
   GtkWidget *confirm_area;
   GtkWidget *ok_btn;
+  GtkWidget *mainwin;
 
-  window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
-  gtk_container_set_border_width(GTK_CONTAINER(window), 8);
-  gtk_window_position(GTK_WINDOW(window), GTK_WIN_POS_CENTER);
-  gtk_window_set_modal(GTK_WINDOW(window), TRUE);
-  gtk_window_set_policy(GTK_WINDOW(window), FALSE, TRUE, FALSE);
-  gtk_window_set_default_size(GTK_WINDOW(window), 300, 200);
-  gtk_widget_realize(window);
+  mainwin = syl_plugin_main_window_get();
+  g_opt.window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+  g_print("[PLUGIN] window %p\n", g_opt.window);
+  gtk_container_set_border_width(GTK_CONTAINER(g_opt.window), 8);
+  gtk_window_position(GTK_WINDOW(g_opt.window), GTK_WIN_POS_CENTER);
+  gtk_window_set_modal(GTK_WINDOW(g_opt.window), TRUE);
+  gtk_window_set_transient_for(GTK_WINDOW(g_opt.window), mainwin);
+  gtk_window_set_policy(GTK_WINDOW(g_opt.window), FALSE, TRUE, FALSE);
+  gtk_window_set_default_size(GTK_WINDOW(g_opt.window), 300, 200);
+  gtk_widget_realize(g_opt.window);
 
   vbox = gtk_vbox_new(FALSE, 6);
   gtk_widget_show(vbox);
-  gtk_container_add(GTK_CONTAINER(window), vbox);
+  gtk_container_add(GTK_CONTAINER(g_opt.window), vbox);
 
   /* main tab */
   GtkWidget *frame = gtk_frame_new(_("Sylfilter Result:"));
@@ -430,12 +432,12 @@ static void exec_sylfm_popup_menu_cb(MsgInfo *msginfo)
   gtk_box_pack_end(GTK_BOX(vbox), confirm_area, FALSE, FALSE, 0);
   gtk_widget_grab_default(ok_btn);
 
-  gtk_window_set_title(GTK_WINDOW(window), _("SylFm Settings"));
+  gtk_window_set_title(GTK_WINDOW(g_opt.window), _("SylFm Settings"));
 
   g_signal_connect(G_OBJECT(ok_btn), "clicked",
-                   G_CALLBACK(popup_ok_cb), window);
+                   G_CALLBACK(popup_ok_cb), g_opt.window);
 
-  gtk_widget_show_all(window);
+  gtk_widget_show_all(g_opt.window);
 }
 
 static void prefs_ok_cb(GtkWidget *widget, gpointer data)
@@ -453,6 +455,7 @@ static void apply_sylfilter_cb( GtkWidget *widget,
 {
   MsgInfo *msginfo = (MsgInfo*)data;
 
+  g_print("[PLUGIN] widget %p\n", widget);
   gchar *file = NULL;
   file = myprocmsg_get_message_file_path(msginfo);
   if (!file){
@@ -490,6 +493,8 @@ static void apply_sylfilter_cb( GtkWidget *widget,
     }
     xfilter_bayes_db_done();
     xfilter_done();
+
+    gtk_widget_destroy(g_opt.window);
   }
   /**/
 }
