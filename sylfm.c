@@ -25,6 +25,7 @@
 #include "sylfm.h"
 #include "folder.h"
 #include "procmsg.h"
+#include "alertpanel.h"
 
 #include "sylfilter/filter.h"
 #include "sylfilter/filter-kvs.h"
@@ -51,9 +52,6 @@ static SylFmOption g_opt;
 
 void plugin_load(void)
 {
-  GList *list, *cur;
-  const gchar *ver;
-  gpointer mainwin;
 
   syl_init_gettext(SYLFM, "lib/locale");
 
@@ -209,12 +207,6 @@ static void messageview_show_cb(GObject *obj, gpointer msgview,
 		msginfo && msginfo->subject ? msginfo->subject : "");
 }
 
-static void button_clicked(GtkWidget *widget, gpointer data)
-{
-	g_print("button_clicked\n");
-	/* syl_plugin_app_will_exit(TRUE); */
-}
-
 static void exec_sylfm_menu_cb(void)
 {
 #if 0
@@ -340,7 +332,6 @@ static void exec_sylfm_popup_menu_cb(MsgInfo *msginfo)
   GtkWidget *vbox;
   GtkWidget *confirm_area;
   GtkWidget *ok_btn;
-  GtkWidget *cancel_btn;
 
   window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
   gtk_container_set_border_width(GTK_CONTAINER(window), 8);
@@ -491,8 +482,10 @@ static void apply_sylfilter_cb( GtkWidget *widget,
     }
     if (retval != 0) {
       /* error */
+      syl_plugin_alertpanel_message(_("SylFm"), _("learn junk mail"), ALERT_NOTICE);
       g_print("error: %s\n", file);
     } else {
+      syl_plugin_alertpanel_message(_("SylFm"), _("learn clean mail"), ALERT_NOTICE);
       g_print("ok: %s\n", file);
     }
     xfilter_bayes_db_done();

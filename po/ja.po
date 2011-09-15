@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-15 12:23+0900\n"
+"POT-Creation-Date: 2011-09-15 22:22+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: HAYASHI Kentaro <kenhys@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -66,8 +66,20 @@ msgstr "手作業でフィルタ:"
 
 #: sylfm.c:412
 msgid "junk mail"
-msgstr "SPAMメール"
+msgstr "spamメール"
 
 #: sylfm.c:414
 msgid "clean mail"
+msgstr "通常メール"
+
+#: sylfm.c:494 sylfm.c:497
+msgid "SylFm"
+msgstr ""
+
+#: sylfm.c:494
+msgid "learn junk mail"
+msgstr "spamメール"
+
+#: sylfm.c:497
+msgid "learn clean mail"
 msgstr "通常メール"

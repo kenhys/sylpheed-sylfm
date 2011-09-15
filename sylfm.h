@@ -75,7 +75,6 @@ static void menu_selected_cb(void);
 static void messageview_show_cb(GObject *obj, gpointer msgview,
 				MsgInfo *msginfo, gboolean all_headers);
 
-static void create_window(void);
 static void create_folderview_sub_widget(void);
 static void exec_sylfm_popup_menu_cb(MsgInfo *msginfo);
 static int test_filter(int mode, const char *file);
