@@ -41,7 +41,7 @@
 
 static SylPluginInfo info = {
 	N_(PLUGIN_NAME),
-	"0.2.2",
+	"0.2.3",
 	"HAYASHI Kentaro",
 	N_(PLUGIN_DESC),
 };
@@ -485,10 +485,18 @@ static void apply_sylfilter_cb( GtkWidget *widget,
     }
     if (retval != 0) {
       /* error */
-      syl_plugin_alertpanel_message(_("SylFm"), _("learn junk mail"), ALERT_NOTICE);
+      if (bjunk != FALSE){
+        syl_plugin_alertpanel_message(_("SylFm"), _("learn junk mail error"), ALERT_ERROR);
+      } else {
+        syl_plugin_alertpanel_message(_("SylFm"), _("learn clean mail error"), ALERT_ERROR);
+      }
       g_print("error: %s\n", file);
     } else {
-      syl_plugin_alertpanel_message(_("SylFm"), _("learn clean mail"), ALERT_NOTICE);
+      if (bjunk != FALSE){
+        syl_plugin_alertpanel_message(_("SylFm"), _("learn junk mail"), ALERT_NOTICE);
+      } else {
+        syl_plugin_alertpanel_message(_("SylFm"), _("learn clean mail"), ALERT_NOTICE);
+      }
       g_print("ok: %s\n", file);
     }
     xfilter_bayes_db_done();

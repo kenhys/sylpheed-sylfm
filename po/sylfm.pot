@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-15 22:22+0900\n"
+"POT-Creation-Date: 2011-09-16 19:01+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,62 +24,70 @@ msgstr ""
 msgid "SylFilter management plug-in for Sylpheed"
 msgstr ""
 
-#: sylfm.c:64
+#: sylfm.c:62
 msgid "SylFm plugin settings [sylfm]"
 msgstr ""
 
-#: sylfm.c:83 sylfm.c:139
+#: sylfm.c:81 sylfm.c:137
 msgid "/Show sylfilter status [sylfm]"
 msgstr ""
 
-#: sylfm.c:179
+#: sylfm.c:177
 msgid "Show sylfilter status"
 msgstr ""
 
-#: sylfm.c:265 sylfm.c:442
+#: sylfm.c:256 sylfm.c:435
 msgid "SylFm Settings"
 msgstr ""
 
-#: sylfm.c:358
+#: sylfm.c:351
 msgid "Sylfilter Result:"
 msgstr ""
 
-#: sylfm.c:383
+#: sylfm.c:376
 msgid "junk"
 msgstr ""
 
-#: sylfm.c:388
+#: sylfm.c:381
 msgid "clean"
 msgstr ""
 
-#: sylfm.c:393
+#: sylfm.c:386
 msgid "could not be classified"
 msgstr ""
 
-#: sylfm.c:398
+#: sylfm.c:391
 msgid "error"
 msgstr ""
 
-#: sylfm.c:409
+#: sylfm.c:402
 msgid "Sylfilter by hand:"
 msgstr ""
 
-#: sylfm.c:412
+#: sylfm.c:405
 msgid "junk mail"
 msgstr ""
 
-#: sylfm.c:414
+#: sylfm.c:407
 msgid "clean mail"
 msgstr ""
 
-#: sylfm.c:494 sylfm.c:497
+#: sylfm.c:489 sylfm.c:491 sylfm.c:496 sylfm.c:498
 msgid "SylFm"
 msgstr ""
 
-#: sylfm.c:494
+#: sylfm.c:489
+msgid "learn junk mail error"
+msgstr ""
+
+#: sylfm.c:491
+msgid "learn clean mail error"
+msgstr ""
+
+#: sylfm.c:496
 msgid "learn junk mail"
 msgstr ""
 
-#: sylfm.c:497
+#: sylfm.c:498
 msgid "learn clean mail"
 msgstr ""

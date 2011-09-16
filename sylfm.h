@@ -1,5 +1,5 @@
 /*
- * SylFm -- 
+ * SylFm -- SylFilter management plug-in for Sylpheed
  * Copyright (C) 2011 HAYASHI Kentaro
  *
  * This program is free software; you can redistribute it and/or modify

@@ -11,14 +11,8 @@ LIBSYLFILTER=./lib/libsylfilter.a
 LIBS=" `pkg-config --libs glib-2.0 gobject-2.0 gtk+-2.0 gthread-2.0` -L./lib -lsqlite3-0"
 INC=" -I. -I../../ -I../../libsylph -I../../src -I/mingw/local `pkg-config --cflags glib-2.0 cairo gdk-2.0 gtk+-2.0 gthread-2.0`"
 
-USE_AQUESTALK=1
 DEF=" -DHAVE_CONFIG_H -DUNICODE -D_UNICODE -DRELEASE_3_1"
 DEBUG=0
-LIB_AQUESTALK=""
-if [ "$USE_AQUESTALK" -eq 1 ]; then
-    DEF="$DEF -DUSE_AQUESTALK -DMULTI_STR_CODE"
-    LIB_AQUESTALK=" -lAquesTalk2 -lAquesTalk2Da -lAqKanji2Koe AquesTalk2Da.dll AqKanji2Koe.dll"
-fi
 
 function compile ()
 {
@@ -116,8 +110,10 @@ else
                     r=$1
                     shift
                     zip sylpheed-$NAME-$r.zip $NAME.dll
-                    zip -r sylpheed-$NAME-$r.zip README.ja.txt
-                    #zip -r sylpheed-$NAME-$r.zip $NAME.c
+                    zip -r sylpheed-$NAME-$r.zip README.*.txt
+                    zip -r sylpheed-$NAME-$r.zip $NAME.c
+                    zip -r sylpheed-$NAME-$r.zip $NAME.h
+                    zip -r sylpheed-$NAME-$r.zip version.rc
                     zip -r sylpheed-$NAME-$r.zip po/$NAME.mo
                     #zip -r sylpheed-$NAME-$r.zip *.xpm
                 fi

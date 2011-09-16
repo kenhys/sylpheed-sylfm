@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2011-09-15 22:22+0900\n"
+"POT-Creation-Date: 2011-09-16 19:01+0900\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: HAYASHI Kentaro <kenhys@gmail.com>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -24,62 +24,72 @@ msgstr "SylFm - SylFilter 管理プラグイン for Sylpheed"
 msgid "SylFilter management plug-in for Sylpheed"
 msgstr "SylFilter 管理プラグイン for Sylpheed"
 
-#: sylfm.c:64
+#: sylfm.c:62
 msgid "SylFm plugin settings [sylfm]"
 msgstr "SylFm プラグイン設定 [sylfm]"
 
-#: sylfm.c:83 sylfm.c:139
+#: sylfm.c:81 sylfm.c:137
 msgid "/Show sylfilter status [sylfm]"
 msgstr "/sylfilterの状態を表示 [sylfm]"
 
-#: sylfm.c:179
+#: sylfm.c:177
 msgid "Show sylfilter status"
 msgstr "sylfilterの状態を表示"
 
-#: sylfm.c:265 sylfm.c:442
+#: sylfm.c:256 sylfm.c:435
 msgid "SylFm Settings"
 msgstr "SylFm 設定"
 
-#: sylfm.c:358
+#: sylfm.c:351
 msgid "Sylfilter Result:"
 msgstr "Sylfilter結果:"
 
-#: sylfm.c:383
+#: sylfm.c:376
 msgid "junk"
 msgstr "ジャンク"
 
-#: sylfm.c:388
+#: sylfm.c:381
 msgid "clean"
 msgstr "通常"
 
-#: sylfm.c:393
+#: sylfm.c:386
 msgid "could not be classified"
 msgstr "未確定"
 
-#: sylfm.c:398
+#: sylfm.c:391
 msgid "error"
 msgstr "エラー"
 
-#: sylfm.c:409
+#: sylfm.c:402
 msgid "Sylfilter by hand:"
 msgstr "手作業でフィルタ:"
 
-#: sylfm.c:412
+#: sylfm.c:405
 msgid "junk mail"
 msgstr "spamメール"
 
-#: sylfm.c:414
+#: sylfm.c:407
 msgid "clean mail"
 msgstr "通常メール"
 
-#: sylfm.c:494 sylfm.c:497
+#: sylfm.c:489 sylfm.c:491 sylfm.c:496 sylfm.c:498
 msgid "SylFm"
 msgstr ""
 
-#: sylfm.c:494
-msgid "learn junk mail"
-msgstr "spamメール"
+#: sylfm.c:489
+#, fuzzy
+msgid "learn junk mail error"
+msgstr "spamメール学習エラー"
 
-#: sylfm.c:497
+#: sylfm.c:491
+#, fuzzy
+msgid "learn clean mail error"
+msgstr "通常メール学習エラー"
+
+#: sylfm.c:496
+msgid "learn junk mail"
+msgstr "spamメール学習"
+
+#: sylfm.c:498
 msgid "learn clean mail"
-msgstr "通常メール"
+msgstr "通常メール学習"
