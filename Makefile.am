@@ -12,7 +12,7 @@ INCLUDES = \
 	-I$(top_srcdir)/libsylph \
 	-I$(top_srcdir)/src
 
-autoforward_la_LIBADD = \
+sylfm_la_LIBADD = \
 	$(GTK_LIBS) \
 	$(top_builddir)/src/libsylpheed-plugin-0.la \
 	$(top_builddir)/libsylph/libsylph-0.la
