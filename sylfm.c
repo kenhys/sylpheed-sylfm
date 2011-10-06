@@ -41,7 +41,7 @@
 
 static SylPluginInfo info = {
 	N_(PLUGIN_NAME),
-	"0.2.3",
+	"0.3.0",
 	"HAYASHI Kentaro",
 	N_(PLUGIN_DESC),
 };
@@ -54,6 +54,9 @@ void plugin_load(void)
 {
 
   syl_init_gettext(SYLFM, "lib/locale");
+
+  info.name = g_strdup(_(PLUGIN_NAME));
+  info.description = g_strdup(_(PLUGIN_DESC));
 
   g_print("[PLUGIN] sylfm plug-in loaded!\n");
 
