@@ -41,7 +41,7 @@
 
 static SylPluginInfo info = {
 	N_(PLUGIN_NAME),
-	"0.3.0",
+	"0.4.0",
 	"HAYASHI Kentaro",
 	N_(PLUGIN_DESC),
 };
@@ -357,7 +357,7 @@ static void exec_sylfm_popup_menu_cb(MsgInfo *msginfo)
   file = myprocmsg_get_message_file_path(msginfo);
   if (!file){
   } else {
-    xfilter_init();
+    xfilter_init(XF_APP_MODE_EXT_LIBSYLPH);
 
     xfilter_kvs_sqlite_set_engine();
 
@@ -466,7 +466,7 @@ static void apply_sylfilter_cb( GtkWidget *widget,
     g_print("msg file %s\n", file);
     int retval = 0;
     gboolean bjunk = gtk_toggle_button_get_active(GTK_TOGGLE_BUTTON(g_opt.junk_radio));
-    xfilter_init();
+    xfilter_init(XF_APP_MODE_EXT_LIBSYLPH);
 
     xfilter_kvs_sqlite_set_engine();
 

@@ -14,6 +14,10 @@ INC=" -I. -I../../ -I../../libsylph -I../../src -I/mingw/local `pkg-config --cfl
 DEF=" -DHAVE_CONFIG_H -DUNICODE -D_UNICODE -DRELEASE_3_1"
 DEBUG=0
 
+MAJOR=0
+MINOR=4
+SUBMINOR=0
+
 function compile ()
 {
     if [ ! -f "private_build.h" ]; then
@@ -23,6 +27,10 @@ function compile ()
         ret=`cat .compile | gawk '{print $i+1}'`
         echo $ret | tee .compile
         echo "#define PRIVATE_BUILD \"build $ret\\0\"" > private_build.h
+        echo "#define NAME \"SylFm\\0\"" >> private_build.h
+        echo "#define VERSION \"$MAJOR, $MINOR, $SUBMINOR, 0\\0\"" >> private_build.h
+        echo "#define NAMEVERSION \"SylFm $MAJOR.$MINOR.$SUBMINOR\\0\"" >> private_build.h
+        echo "#define QVERSION \"$MAJOR,$MINOR,$SUBMINOR,0\"" >> private_build.h
     fi
     com="windres -i version.rc -o version.o"
     echo $com
