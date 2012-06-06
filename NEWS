@@ -1,0 +1,23 @@
+News of sylfm
+
+
+* 0.4.0 (2011-10-18)
+
+  * link with sylfilter 0.5.
+
+* 0.3.0 (2011-10-07)
+
+  * link with sylfilter 0.4.
+
+* 0.2.3 (2011-09-16)
+
+  * fix filter result message.
+
+* 0.2.2 (2011-09-15)
+
+  * fix filter learning.
+
+* 0.1.0 (2011-09-15)
+
+  * first test release.
+
