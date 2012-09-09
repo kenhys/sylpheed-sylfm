@@ -1,0 +1,14 @@
+*.o
+*.so
+.deps
+.libs
+*~
+*.a
+*.la
+*.lo
+*.dll
+Makefile
+*.in
+src/.compile
+src/private_build.h
+src/*.dll
