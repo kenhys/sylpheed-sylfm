@@ -9,6 +9,8 @@
 *.dll
 Makefile
 *.in
+config.*
+config/*
 autom4te.*
 m4/lt*
 m4/lib*
