@@ -27,9 +27,6 @@
 #define SYLFM "sylfm"
 #define SYLFMRC "sylfmrc"
 
-#define PLUGIN_NAME N_("SylFm - SylFilter management plug-in for Sylpheed")
-#define PLUGIN_DESC N_("SylFilter management plug-in for Sylpheed")
-
 struct _SylFmOption {
   /* full path to ghostbiffrc*/
   gchar *rcpath;

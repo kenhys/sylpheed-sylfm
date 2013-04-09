@@ -39,6 +39,9 @@
 #include "sylfilter/ngram-filter.h"
 #include "sylfilter/bayes-filter.h"
 
+#define PLUGIN_NAME N_("SylFm - SylFilter management plug-in for Sylpheed")
+#define PLUGIN_DESC N_("SylFilter management plug-in for Sylpheed")
+
 static SylPluginInfo info = {
 	N_(PLUGIN_NAME),
 	VERSION,
