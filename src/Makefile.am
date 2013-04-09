@@ -10,6 +10,7 @@ INCLUDES = \
 	$(GTK_CFLAGS) \
 	$(HTML_CFLAGS) \
 	-I$(includedir) \
+	-I$(includedir)/sylfilter \
 	-I$(sylpheed_build_dir) \
 	-I$(sylpheed_build_dir)/libsylph \
 	-I$(sylpheed_build_dir)/src \
