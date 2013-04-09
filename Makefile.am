@@ -1,21 +1,7 @@
-libdir = $(plugindir)
+SUBDIRS = src
 
-lib_LTLIBRARIES = sylfm.la
 
-sylfm_la_SOURCES = sylfm.c version.rc
-sylfm_la_LDFLAGS = -module -no-undefined -avoid-version
+PLUGIN_NAME = sylfm
+PLUGIN_SO = src/.libs/$(PLUGIN_NAME).so
 
-INCLUDES = \
-	$(GTK_CFLAGS) \
-	-I$(includedir) \
-	-I$(top_srcdir) \
-	-I$(top_srcdir)/libsylph \
-	-I$(top_srcdir)/src
-
-sylfm_la_LIBADD = \
-	$(GTK_LIBS) \
-	$(top_builddir)/src/libsylpheed-plugin-0.la \
-	$(top_builddir)/libsylph/libsylph-0.la
-
-install:
-install-plugin: install-am
+include lib/sylplugin_factory/build/common.mk
