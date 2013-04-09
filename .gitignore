@@ -9,6 +9,9 @@
 *.dll
 Makefile
 *.in
+autom4te.*
+m4/lt*
+m4/lib*
 src/.compile
 src/private_build.h
 src/*.dll
