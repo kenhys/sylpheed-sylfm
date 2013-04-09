@@ -24,10 +24,6 @@
 #include <glib/gi18n-lib.h>
 #include <locale.h>
 
-#define _(String) dgettext("sylfm", String)
-#define N_(String) gettext_noop(String)
-#define gettext_noop(String) (String)
-
 #define SYLFM "sylfm"
 #define SYLFMRC "sylfmrc"
 
