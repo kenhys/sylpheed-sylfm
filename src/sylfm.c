@@ -22,7 +22,6 @@
 
 #include "sylmain.h"
 #include "plugin.h"
-#include "sylfm.h"
 #include "folder.h"
 #include "procmsg.h"
 #include "alertpanel.h"
@@ -38,6 +37,8 @@
 #include "sylfilter/wordsep-filter.h"
 #include "sylfilter/ngram-filter.h"
 #include "sylfilter/bayes-filter.h"
+
+#include "sylfm.h"
 
 #define PLUGIN_NAME N_("SylFm - SylFilter management plug-in for Sylpheed")
 #define PLUGIN_DESC N_("SylFilter management plug-in for Sylpheed")
